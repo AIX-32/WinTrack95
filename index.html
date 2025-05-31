@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WinTrack95</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A Windows 95 style music player">
+    <link rel="stylesheet" href="win95.css">
+    <link href="https://fonts.cdnfonts.com/css/w95fa" rel="stylesheet">
+    <link rel="icon" href="logo.png" type="image/png">
+</head>
+<body>
+    <nav id="taskbar" role="navigation" aria-label="Main navigation">
+        <button class="start-button" aria-label="Open Start menu">
+            <img src="logo.png" alt="Windows 95 logo" class="start-logo" width="16" height="16">
+            Start
+        </button>
+        <div class="taskbar-items">
+            <button class="app" role="tab" aria-selected="true">Player</button>
+            <button class="app" role="tab">Library</button>
+            <button class="app" role="tab">Settings</button>
+            <button class="app" role="tab">Playlists</button>
+        </div>
+    </nav>
+
+    <div class="window" role="dialog" aria-labelledby="visualizer-title" style="position: absolute; left: 300px; top: 150px; width: 300px; height: 250px; display: none;">
+        <div class="title-bar">
+            <span class="title-text" id="visualizer-title">Audio Visualizer</span>
+            <div class="window-controls" role="toolbar" aria-label="Window controls">
+                <button class="control-btn" aria-label="Minimize">_</button>
+                <button class="control-btn" aria-label="Maximize">□</button>
+                <button class="control-btn" aria-label="Close">×</button>
+            </div>
+        </div>
+        <div class="content" role="main">
+            <canvas id="visualizer" width="280" height="180" style="margin: 8px; border: 2px inset #808080;" aria-label="Audio visualization"></canvas>
+            <div class="visualizer-controls" role="toolbar" aria-label="Visualization controls" style="display: flex; justify-content: center; margin-top: 5px;">
+                <button class="btn" id="waveformBtn" aria-pressed="true">Waveform</button>
+                <button class="btn" id="spectrumBtn" aria-pressed="false">Spectrum</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="window" style="position: absolute; left: 30px; top: 50px;">
+        <div class="title-bar">
+            <span class="title-text">Media Library</span>
+            <div class="window-controls">
+                <button class="control-btn">_</button>
+                <button class="control-btn">□</button>
+                <button class="control-btn">×</button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="track-list"></div>
+            <div class="library-controls">
+                <button class="btn" id="uploadBtn">↑ Upload</button>
+                <button class="btn" id="addToPlaylistBtn">Add to Playlist</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="window" style="position: absolute; left: 20px; top: 300px; width: 400px;">
+        <div class="title-bar">
+            <span class="title-text">Windows Media Player 3.1</span>
+            <div class="window-controls">
+                <button class="control-btn">_</button>
+                <button class="control-btn">□</button>
+                <button class="control-btn">×</button>
+            </div>
+        </div>
+        <div class="player-controls">
+            <button class="btn" id="playBtn">Play</button>
+            <button class="btn" id="stopBtn">Stop</button>
+            <button class="btn" id="loopBtn">Loop</button>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="window" style="position: absolute; left: 30px; top: 440px; width: 250px;">
+        <div class="title-bar">
+            <span class="title-text">Settings</span>
+            <div class="window-controls">
+                <button class="control-btn">_</button>
+                <button class="control-btn">□</button>
+                <button class="control-btn">×</button>
+            </div>
+        </div>
+        <div class="volume-control">
+            <label for="volumeControl" style="font-size:12px; margin:8px;">Master Volume</label>
+            <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1" class="volume-slider">
+        </div>
+        <div class="equalizer-control">
+            <div class="equalizer-label" style="font-size:12px; margin:8px;">Equalizer</div>
+            <div class="equalizer-sliders">
+                <div class="eq-slider-container">
+                    <label for="bassControl" style="font-size:11px; margin:4px;">Bass</label>
+                    <input type="range" id="bassControl" min="-10" max="10" step="1" value="0" class="volume-slider">
+                </div>
+                <div class="eq-slider-container">
+                    <label for="trebleControl" style="font-size:11px; margin:4px;">Treble</label>
+                    <input type="range" id="trebleControl" min="-10" max="10" step="1" value="0" class="volume-slider">
+                </div>
+            </div>
+        </div>
+        <div class="crossfade-control">
+            <label for="crossfadeControl" style="font-size:12px; margin:8px;">Crossfade (seconds)</label>
+            <input type="range" id="crossfadeControl" min="0" max="5" step="0.5" value="0" class="volume-slider">
+            <div id="crossfadeValue" style="font-size:11px; text-align:center;">0s</div>
+        </div>
+    </div>
+
+    <div class="window" style="position: absolute; left: 70px; top: 70px; width: 350px;">
+        <div class="title-bar">
+            <span class="title-text">Playlists</span>
+            <div class="window-controls">
+                <button class="control-btn">_</button>
+                <button class="control-btn">□</button>
+                <button class="control-btn">×</button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="playlist-controls">
+                <input type="text" id="playlistNameInput" placeholder="Playlist name" class="win95-input">
+                <button class="btn" id="createPlaylistBtn">Create New</button>
+            </div>
+            <div class="playlist-container">
+                <div class="playlist-list"></div>
+                <div class="playlist-tracks"></div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" hidden accept="audio/*">
+    
+    <script type="module" src="app.js"></script>
+    <script type="module" src="window-controls.js"></script>
+
+</body>
+</html>
