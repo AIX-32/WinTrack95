@@ -20,11 +20,43 @@ function initializeWindowControls() {
             activeWindow = window;
         });
 
-        minimizeBtn.addEventListener('click', () => minimizeWindow(window));
-        maximizeBtn.addEventListener('click', () => maximizeWindow(window));
-        closeBtn.addEventListener('click', () => closeWindow(window));
+        // Add both click and touch event listeners for better mobile support
+        const addWindowControlListeners = (element, handler) => {
+            element.addEventListener('click', handler);
+            element.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handler(e);
+            }, { passive: false });
+        };
 
-        window.querySelector('.title-bar').addEventListener('dblclick', () => maximizeWindow(window));
+        addWindowControlListeners(minimizeBtn, () => minimizeWindow(window));
+        addWindowControlListeners(maximizeBtn, () => maximizeWindow(window));
+        addWindowControlListeners(closeBtn, () => closeWindow(window));
+
+        // Handle title bar double-click/tap for maximize/restore
+        const titleBar = window.querySelector('.title-bar');
+        let tapCount = 0;
+        let tapTimer = null;
+
+        const handleTitleBarTap = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            tapCount++;
+            if (tapCount === 1) {
+                tapTimer = setTimeout(() => {
+                    tapCount = 0;
+                }, 300);
+            } else if (tapCount === 2) {
+                clearTimeout(tapTimer);
+                tapCount = 0;
+                maximizeWindow(window);
+            }
+        };
+
+        titleBar.addEventListener('dblclick', () => maximizeWindow(window));
+        titleBar.addEventListener('touchend', handleTitleBarTap, { passive: false });
     });
 }
 
@@ -38,11 +70,18 @@ function minimizeWindow(window) {
         window.style.display = 'none';
         taskbarApp.classList.add('minimized');
 
-        taskbarApp.addEventListener('click', function showWindow() {
+        const showWindow = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             window.style.display = 'block';
+            window.style.zIndex = '10';
             taskbarApp.classList.remove('minimized');
             taskbarApp.removeEventListener('click', showWindow);
-        });
+            taskbarApp.removeEventListener('touchend', showWindow);
+        };
+
+        taskbarApp.addEventListener('click', showWindow);
+        taskbarApp.addEventListener('touchend', showWindow, { passive: false });
     }
 }
 
