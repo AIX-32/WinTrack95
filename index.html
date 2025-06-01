@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>WinTrack95</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="A Windows 95 style music player">
     <link rel="stylesheet" href="win95.css">
     <link href="https://fonts.cdnfonts.com/css/w95fa" rel="stylesheet">
@@ -16,32 +16,13 @@
             Start
         </button>
         <div class="taskbar-items">
-            <button class="app" role="tab" aria-selected="true">Player</button>
-            <button class="app" role="tab">Library</button>
-            <button class="app" role="tab">Settings</button>
-            <button class="app" role="tab">Playlists</button>
+            <button class="app" data-window="media-library" role="tab" aria-selected="true">Media Library</button>
+            <button class="app" data-window="player" role="tab">Player</button>
+            <button class="app" data-window="playlists" role="tab">Playlists</button>
         </div>
     </nav>
 
-    <div class="window" role="dialog" aria-labelledby="visualizer-title" style="position: absolute; left: 300px; top: 150px; width: 300px; height: 250px; display: none;">
-        <div class="title-bar">
-            <span class="title-text" id="visualizer-title">Audio Visualizer</span>
-            <div class="window-controls" role="toolbar" aria-label="Window controls">
-                <button class="control-btn" aria-label="Minimize">_</button>
-                <button class="control-btn" aria-label="Maximize">□</button>
-                <button class="control-btn" aria-label="Close">×</button>
-            </div>
-        </div>
-        <div class="content" role="main">
-            <canvas id="visualizer" width="280" height="180" style="margin: 8px; border: 2px inset #808080;" aria-label="Audio visualization"></canvas>
-            <div class="visualizer-controls" role="toolbar" aria-label="Visualization controls" style="display: flex; justify-content: center; margin-top: 5px;">
-                <button class="btn" id="waveformBtn" aria-pressed="true">Waveform</button>
-                <button class="btn" id="spectrumBtn" aria-pressed="false">Spectrum</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="window" style="position: absolute; left: 30px; top: 50px;">
+    <div id="media-library" class="window" style="position: absolute; left: 30px; top: 150px;">
         <div class="title-bar">
             <span class="title-text">Media Library</span>
             <div class="window-controls">
@@ -59,7 +40,7 @@
         </div>
     </div>
 
-    <div class="window" style="position: absolute; left: 20px; top: 300px; width: 400px;">
+    <div class="window" style="position: absolute; left: 20px; top: 300px; width: 300px; ">
         <div class="title-bar">
             <span class="title-text">Windows Media Player 3.1</span>
             <div class="window-controls">
@@ -111,7 +92,7 @@
         </div>
     </div>
 
-    <div class="window" style="position: absolute; left: 70px; top: 70px; width: 350px;">
+    <div id="playlists" class="window" style="position: absolute; left: 70px; top: 170px; width: 350px;">
         <div class="title-bar">
             <span class="title-text">Playlists</span>
             <div class="window-controls">
