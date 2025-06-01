@@ -16,13 +16,14 @@
             Start
         </button>
         <div class="taskbar-items">
-            <button class="app" data-window="media-library" role="tab" aria-selected="true">Media Library</button>
-            <button class="app" data-window="player" role="tab">Player</button>
-            <button class="app" data-window="playlists" role="tab">Playlists</button>
+            <button class="app" role="tab" aria-selected="true">Player</button>
+            <button class="app" role="tab">Library</button>
+            <button class="app" role="tab">Settings</button>
+            <button class="app" role="tab">Playlists</button>
         </div>
     </nav>
 
-    <div id="media-library" class="window" style="position: absolute; left: 30px; top: 150px;">
+    <div class="window" style="position: absolute; left: 30px; top: 150px;">
         <div class="title-bar">
             <span class="title-text">Media Library</span>
             <div class="window-controls">
@@ -92,7 +93,7 @@
         </div>
     </div>
 
-    <div id="playlists" class="window" style="position: absolute; left: 70px; top: 170px; width: 350px;">
+    <div class="window" style="position: absolute; left: 70px; top: 170px; width: 350px;">
         <div class="title-bar">
             <span class="title-text">Playlists</span>
             <div class="window-controls">
