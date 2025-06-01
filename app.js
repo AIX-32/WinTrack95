@@ -131,53 +131,155 @@ let dragElement = null;
 let posX = 0, posY = 0, startX = 0, startY = 0;
 
 const startDrag = (e) => {
+  // Prevent default to avoid text selection and touch actions
+  e.preventDefault();
+  
   if (e.target.closest('.title-bar')) {
+    // Prevent multiple drags
+    if (dragElement) return;
+    
     dragElement = e.target.closest('.window');
     const rect = dragElement.getBoundingClientRect();
-    posX = rect.left - window.scrollX;
-    posY = rect.top - window.scrollY;
+    
+    // Store initial positions
+    posX = rect.left;
+    posY = rect.top;
     startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
     startY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
-
+    
+    // Add styles to prevent text selection and improve dragging performance
+    document.body.style.userSelect = 'none';
+    document.body.style.webkitUserSelect = 'none';
+    dragElement.style.cursor = 'grabbing';
+    dragElement.style.transition = 'none'; // Disable transitions during drag
+    
+    // Add appropriate event listeners based on input type
     if (e.type === 'mousedown') {
       document.addEventListener('mousemove', moveWindow);
-      document.addEventListener('mouseup', stopDrag);
+      document.addEventListener('mouseup', stopDrag, { once: true });
     } else {
+      // Prevent scrolling on touch devices
+      document.body.style.overflow = 'hidden';
       document.addEventListener('touchmove', moveWindow, { passive: false });
-      document.addEventListener('touchend', stopDrag);
+      document.addEventListener('touchend', stopDrag, { once: true });
     }
   }
 };
 
 const moveWindow = (e) => {
-  e.preventDefault(); 
+  // Prevent default to avoid text selection, touch actions, and scrolling
+  e.preventDefault();
+  e.stopPropagation();
+  
+  if (!dragElement) return;
+  
+  // Get current touch/mouse position
   const currentX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
   const currentY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
-  const dx = currentX - startX;
-  const dy = currentY - startY;
-
-  const maxX = window.innerWidth - dragElement.offsetWidth;
-  const maxY = window.innerHeight - dragElement.offsetHeight;
-  const newX = Math.min(Math.max(0, posX + dx), maxX);
-  const newY = Math.min(Math.max(0, posY + dy), maxY);
-
+  
+  // Calculate new position
+  let newX = posX + (currentX - startX);
+  let newY = posY + (currentY - startY);
+  
+  // Get viewport dimensions
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  
+  // Get window dimensions
+  const windowWidth = dragElement.offsetWidth;
+  const windowHeight = dragElement.offsetHeight;
+  
+  // Calculate boundaries with a small margin
+  const margin = 20;
+  const minX = 0; // Allow dragging to the left edge
+  const maxX = Math.max(0, viewportWidth - windowWidth); // Don't go beyond right edge
+  const minY = 0; // Allow dragging to the top edge
+  const maxY = viewportHeight - 30; // Keep title bar visible at bottom
+  
+  // Clamp the position to stay within viewport
+  newX = Math.max(minX, Math.min(newX, maxX));
+  newY = Math.max(minY, Math.min(newY, maxY));
+  
+  // Apply the new position
   dragElement.style.left = `${newX}px`;
   dragElement.style.top = `${newY}px`;
 };
 
 const stopDrag = (e) => {
-  if (e.type === 'mouseup') {
-    document.removeEventListener('mousemove', moveWindow);
-    document.removeEventListener('mouseup', stopDrag);
-  } else {
-    document.removeEventListener('touchmove', moveWindow);
-    document.removeEventListener('touchend', stopDrag);
+  if (!dragElement) return;
+  
+  // Re-enable text selection and restore styles
+  document.body.style.userSelect = '';
+  document.body.style.webkitUserSelect = '';
+  document.body.style.overflow = '';
+  
+  if (dragElement) {
+    dragElement.style.cursor = '';
+    dragElement.style.transition = '';
+    
+    // Ensure the window is fully within viewport when dropped
+    const rect = dragElement.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    let newX = rect.left;
+    let newY = rect.top;
+    
+    // If window is partially out of view, adjust its position
+    if (rect.right < 0) newX = 0;
+    if (rect.bottom < 30) newY = 0; // 30px is roughly the title bar height
+    if (rect.left > viewportWidth) newX = viewportWidth - rect.width;
+    if (rect.top > viewportHeight) newY = viewportHeight - 30; // Keep title bar visible
+    
+    // Apply final position if needed
+    if (newX !== rect.left || newY !== rect.top) {
+      dragElement.style.left = `${newX}px`;
+      dragElement.style.top = `${newY}px`;
+    }
   }
+  
+  // Clean up event listeners
+  document.removeEventListener('mousemove', moveWindow);
+  document.removeEventListener('touchmove', moveWindow);
+  document.removeEventListener('mouseup', stopDrag);
+  document.removeEventListener('touchend', stopDrag);
+  
   dragElement = null;
 };
 
 document.addEventListener('mousedown', startDrag);
-document.addEventListener('touchstart', startDrag);
+// Handle touch events for draggable elements
+document.addEventListener('touchstart', (e) => {
+    // Only handle drag if it's on a title bar
+    if (e.target.closest('.title-bar')) {
+        e.preventDefault();
+        startDrag(e);
+    }
+    // Don't prevent default for taskbar buttons
+    else if (e.target.closest('#taskbar button, #taskbar .app')) {
+        return; // Allow default behavior for taskbar buttons
+    }
+    // Prevent default for other elements to avoid scrolling
+    else if (!e.target.closest('input, button, select, textarea, .track-list, .playlist-list, .content')) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+// Only prevent default on touchmove for non-interactive elements
+document.body.addEventListener('touchmove', (e) => {
+    // Allow interaction with these elements
+    if (e.target.closest('.track-list, .playlist-list, .content, input, button, select, textarea, #taskbar')) {
+        return; // Allow default behavior for interactive elements
+    }
+    e.preventDefault();
+}, { passive: false });
+
+// Prevent pinch-zoom on non-interactive elements
+document.addEventListener('gesturestart', (e) => {
+    if (!e.target.closest('input, button, select, textarea, .track-list, .playlist-list, #taskbar')) {
+        e.preventDefault();
+    }
+}, { passive: false });
 
 function initAudio() {
 
