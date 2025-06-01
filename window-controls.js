@@ -1,46 +1,18 @@
-// Track windows and their associated taskbar buttons
-const windowMap = new Map();
-let activeWindow = null;
-
 function initializeWindowControls() {
     const windows = document.querySelectorAll('.window');
-    const taskbarButtons = document.querySelectorAll('.app');
+    let activeWindow = null;
 
-    // First, set up taskbar buttons
-    taskbarButtons.forEach(button => {
-        const windowId = button.getAttribute('data-window');
-        if (windowId) {
-            const window = document.getElementById(windowId);
-            if (window) {
-                windowMap.set(button, window);
-                
-                // Add click handler to taskbar button
-                button.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleWindow(window, button);
-                });
-                
-                // Initialize window state
-                window.style.display = 'none';
-            }
-        }
-    });
-
-    // Then set up windows
-    windows.forEach((window, index) => {
-        const title = window.querySelector('.title-text').textContent;
-
+    windows.forEach(window => {
         const minimizeBtn = window.querySelector('.window-controls .control-btn:nth-child(1)');
         const maximizeBtn = window.querySelector('.window-controls .control-btn:nth-child(2)');
         const closeBtn = window.querySelector('.window-controls .control-btn:nth-child(3)');
 
-        window.dataset.originalWidth = window.style.width || '300px';
-        window.dataset.originalHeight = window.style.height || '200px';
-        window.dataset.originalLeft = window.style.left || '30px';
-        window.dataset.originalTop = window.style.top || (30 + (index * 30)) + 'px';
+        window.dataset.originalWidth = window.style.width;
+        window.dataset.originalHeight = window.style.height;
+        window.dataset.originalLeft = window.style.left;
+        window.dataset.originalTop = window.style.top;
 
-        window.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
+        window.addEventListener('mousedown', () => {
             if (activeWindow && activeWindow !== window) {
                 activeWindow.style.zIndex = '1';
             }
@@ -48,67 +20,29 @@ function initializeWindowControls() {
             activeWindow = window;
         });
 
-        minimizeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            minimizeWindow(window);
-        });
-        
-        maximizeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            maximizeWindow(window);
-        });
-        
-        closeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            closeWindow(window);
-        });
+        minimizeBtn.addEventListener('click', () => minimizeWindow(window));
+        maximizeBtn.addEventListener('click', () => maximizeWindow(window));
+        closeBtn.addEventListener('click', () => closeWindow(window));
 
-        const titleBar = window.querySelector('.title-bar');
-        if (titleBar) {
-            titleBar.addEventListener('dblclick', (e) => {
-                e.stopPropagation();
-                maximizeWindow(window);
-            });
-        }
+        window.querySelector('.title-bar').addEventListener('dblclick', () => maximizeWindow(window));
     });
 }
 
-function toggleWindow(window, taskbarButton) {
-    if (window.style.display === 'none') {
-        // Show window
-        window.style.display = 'block';
-        window.style.zIndex = '10';
-        if (taskbarButton) {
-            taskbarButton.classList.remove('minimized');
-        }
-        
-        // Bring to front
-        if (activeWindow) {
-            activeWindow.style.zIndex = '1';
-        }
-        window.style.zIndex = '100';
-        activeWindow = window;
-        
-        // Ensure window is visible
-        window.style.visibility = 'visible';
-    } else {
-        // Hide window
-        window.style.display = 'none';
-        if (taskbarButton) {
-            taskbarButton.classList.add('minimized');
-        }
-    }
-}
-
 function minimizeWindow(window) {
+
     const title = window.querySelector('.title-text').textContent;
-    const taskbarApp = Array.from(document.querySelectorAll('.app')).find(
-        app => app.textContent === title || windowMap.get(app) === window
-    );
+    const taskbarApp = Array.from(document.querySelectorAll('.app'))
+        .find(app => app.textContent === title);
 
     if (taskbarApp) {
         window.style.display = 'none';
         taskbarApp.classList.add('minimized');
+
+        taskbarApp.addEventListener('click', function showWindow() {
+            window.style.display = 'block';
+            taskbarApp.classList.remove('minimized');
+            taskbarApp.removeEventListener('click', showWindow);
+        });
     }
 }
 
@@ -149,16 +83,6 @@ function maximizeWindow(window) {
 }
 
 function closeWindow(window) {
-    const title = window.querySelector('.title-text').textContent;
-    const taskbarApp = Array.from(document.querySelectorAll('.app')).find(
-        app => app.textContent === title || windowMap.get(app) === window
-    );
-    
-    if (taskbarApp) {
-        taskbarApp.classList.remove('minimized');
-        taskbarApp.style.display = 'block';
-    }
-    
     window.style.display = 'none';
 }
 
