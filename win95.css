@@ -1,12 +1,40 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+}
+
 body {
     background: #008080;
-    margin: 0;
-    padding: 20px;
     font-family: 'W95FA', sans-serif;
-    overflow-x: hidden;
-    min-height: 100vh;
     user-select: none;
     -webkit-user-select: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+/* Ensure interactive elements remain clickable */
+button, input, select, textarea, .btn, .control-btn, .start-button, .app {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 1000;
+}
+
+/* Allow scrolling in content areas */
+.content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
 * {
@@ -20,13 +48,15 @@ body {
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     min-width: 250px;
     min-height: 150px;
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 100px);
     position: absolute;
     display: flex;
     flex-direction: column;
     font-family: 'W95FA', sans-serif;
     z-index: 1;
     resize: both;
-    overflow: auto;
+    overflow: hidden;
     transition: box-shadow 0.2s ease;
   }
 
@@ -97,6 +127,9 @@ body {
     margin: 8px;
     height: 100px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
 }
 
 .track {
@@ -131,6 +164,7 @@ body {
     width: 90%;
     height: 20px;
     -webkit-appearance: none;
+    appearance: none; /* Standard property */
     background: #c0c0c0;
     outline: none;
     border: 2px solid;
@@ -165,6 +199,8 @@ body {
     padding: 2px;
     box-sizing: border-box;
     font-family: sans-serif;
+    z-index: 10000;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .start-button {
@@ -179,6 +215,47 @@ body {
     display: flex;
     align-items: center;
     gap: 4px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    position: relative;
+    z-index: 10001;
+    user-select: none;
+  }
+  
+  .start-button:active {
+    border-top: 2px solid gray;
+    border-left: 2px solid gray;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+  }
+  
+  .app {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    position: relative;
+    z-index: 10001;
+    user-select: none;
+    background: #c0c0c0;
+    border: 2px solid;
+    border-color: #ffffff #808080 #808080 #ffffff;
+    padding: 2px 10px;
+    margin: 0 2px;
+    cursor: pointer;
+    font-family: 'W95FA', sans-serif;
+    font-size: 14px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+  }
+  
+  .app:active {
+    border-color: #808080 #ffffff #ffffff #808080;
+  }
+  
+  .app.minimized {
+    border-color: #808080 #ffffff #ffffff #808080;
   }
 
   .start-logo {
